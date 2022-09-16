@@ -44,8 +44,9 @@ contract Logistic {
         _;
     }
 
-    constructor() {
+    constructor(address _fishmarket) {
         owner = msg.sender;
+        fishmarket = FishMarket(_fishmarket);
     }
 
     /*
