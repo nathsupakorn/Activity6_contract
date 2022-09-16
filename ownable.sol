@@ -1,12 +1,22 @@
 // SPDX-License-Identifier: Non-License
 pragma solidity 0.8.15;
 
+contract Owner {
+    address public owner;
+
+    constructor() {
+        owner = msg.sender;
+    }
+
+}
+
+
 /**
  * @title Owner
  * @dev Set & change owner
  */
-contract Ownable {
-    address private owner;
+contract Ownable is Owner{
+    // address private owner;
 
     // modifier to check if caller is owner
     modifier onlyOwner() {
@@ -18,7 +28,7 @@ contract Ownable {
      * @dev Set contract deployer as owner
      */
     constructor() {
-        owner = msg.sender;
+        // owner = msg.sender;
     }
 
     /**
