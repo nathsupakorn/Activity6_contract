@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Non-License
 pragma solidity 0.8.15;
 
-import './fishMarket.sol'
+import "./fishMarket.sol";
 
 enum StateType {
     Idle,
@@ -26,6 +26,7 @@ struct Deal {
 
 contract Logistic {
     address owner;
+    FishMarket fishmarket;
     mapping(bytes32 => Deal) public deals;
 
     modifier onlyOwner() {
@@ -51,28 +52,29 @@ contract Logistic {
         Function to initalize a initDeal
         @param : customer's address, price (in Ether), minimum and maximum temperature allow, productName
     */
-    function initDeal is FishMarket (
+    function initDeal (
         address payable _customer,
+        string memory _productName,
         uint256 _quantity
     ) public onlyOwner returns (Deal memory) {
-        require(stocks.minTemperature <= stocks.maxTemperature, "invalid maxTemperature");
-        require((_quantity >= 1) && (stocks.quantity >= _quantity), "invalid quantity")
+        require(fishmarket.getStock(_productName).minTemperature <= fishmarket.getStock(_productName).maxTemperature, "invalid maxTemperature");
+        require((_quantity >= 1) && (fishmarket.getStock(_productName).quantity >= _quantity), "invalid quantity");
 
         bytes32 dealId = keccak256(
             abi.encodePacked(_customer, block.timestamp)
         );
 
         //update stocks
-        stocks.quantity = stocks.quantity - _quantity
+        fishmarket.removeStockQuantity(_quantity, _productName);
 
         Deal storage deal = deals[dealId];
 
         deal.dealId = dealId;
         deal.customer = _customer;
-        deal.minTemperature = stocks.minTemperature;
-        deal.maxTemperature = stocks.maxTemperature;
-        deal.price = stocks.price * _quantity;
-        deal.productName = stocks.productName;
+        deal.minTemperature = fishmarket.getStock(_productName).minTemperature;
+        deal.maxTemperature = fishmarket.getStock(_productName).maxTemperature;
+        deal.price = fishmarket.getStock(_productName).price * _quantity;
+        deal.productName = _productName;
         deal.cancelable = false;
         deal.transportState = StateType.Created;
 
